@@ -1,0 +1,443 @@
+{% extends 'blog/base.html' %}
+
+{% block title %}Все статьи — MyBlog{% endblock %}
+
+{% block content %}
+<style>
+    /* ==================== КОНТЕЙНЕР ==================== */
+    .posts-wrapper {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 50px 30px 20px;
+    }
+
+    /* ==================== ЗАГОЛОВОК СТРАНИЦЫ ==================== */
+    .page-header {
+        text-align: center;
+        margin-bottom: 50px;
+        animation: fadeInDown 0.6s ease;
+    }
+
+    .page-header h1 {
+        font-size: 2.8rem;
+        font-weight: 800;
+        color: #1a1a2e;
+        letter-spacing: -1px;
+        margin-bottom: 12px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .page-header p {
+        color: #6b6b8a;
+        font-size: 1.1rem;
+    }
+
+    .page-header .divider {
+        width: 80px;
+        height: 4px;
+        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        border-radius: 2px;
+        margin: 20px auto 0;
+    }
+
+    /* ==================== СЕТКА СТАТЕЙ ==================== */
+    .posts-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+        gap: 30px;
+    }
+
+    /* ==================== КАРТОЧКА СТАТЬИ ==================== */
+    .post-card {
+        background: #ffffff;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        animation: fadeInUp 0.5s ease backwards;
+    }
+
+    /* Задержка появления для каждой карточки */
+    .post-card:nth-child(1) { animation-delay: 0.05s; }
+    .post-card:nth-child(2) { animation-delay: 0.1s; }
+    .post-card:nth-child(3) { animation-delay: 0.15s; }
+    .post-card:nth-child(4) { animation-delay: 0.2s; }
+    .post-card:nth-child(5) { animation-delay: 0.25s; }
+    .post-card:nth-child(6) { animation-delay: 0.3s; }
+    .post-card:nth-child(n+7) { animation-delay: 0.35s; }
+
+    /* Градиентная полоска сверху */
+    .post-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.4s ease;
+        z-index: 2;
+    }
+
+    .post-card:hover::before {
+        transform: scaleX(1);
+    }
+
+    .post-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(102, 126, 234, 0.18);
+    }
+
+    /* ==================== МИНИ-БАННЕР КАРТОЧКИ ==================== */
+    .post-card-img-wrapper {
+        width: 100%;
+        height: 180px;
+        overflow: hidden;
+        background: #f1f5f9;
+        position: relative;
+    }
+
+    .post-card-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+
+    .post-card:hover .post-card-img {
+        transform: scale(1.05);
+    }
+
+    /* Внутренний контейнер для текста, чтобы отступы работали правильно */
+    .post-card-content {
+        padding: 26px 32px 30px;
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+    }
+
+    /* ==================== ДАТА ==================== */
+    .post-card .date {
+        display: inline-block;
+        font-size: 0.75rem;
+        color: #764ba2;
+        background: linear-gradient(135deg, #f3f0ff 0%, #e8e3ff 100%);
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        margin-bottom: 14px;
+        text-transform: uppercase;
+        align-self: flex-start;
+    }
+
+    .post-card .date::before {
+        content: '📅 ';
+        margin-right: 2px;
+    }
+
+    .post-card .date.no-date {
+        display: none;
+    }
+
+    /* ==================== ЗАГОЛОВОК ==================== */
+    .post-card h2 {
+        font-size: 1.4rem;
+        line-height: 1.35;
+        margin-bottom: 14px;
+        font-weight: 700;
+        letter-spacing: -0.3px;
+        margin-top: 0;
+    }
+
+    .post-card h2 a {
+        color: #1a1a2e;
+        text-decoration: none;
+        transition: color 0.3s ease;
+        background-image: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background-size: 0% 2px;
+        background-repeat: no-repeat;
+        background-position: 0 100%;
+        transition: background-size 0.4s ease, color 0.3s ease;
+        display: inline;
+    }
+
+    .post-card h2 a:hover {
+        color: #667eea;
+        background-size: 100% 2px;
+    }
+
+    /* ==================== ТЕКСТ ==================== */
+    .post-card .excerpt {
+        color: #5a5a78;
+        font-size: 0.98rem;
+        line-height: 1.7;
+        margin-bottom: 22px;
+        flex-grow: 1;
+
+        /* Обрезка длинного текста */
+        display: -webkit-box;
+        -webkit-line-clamp: 4;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* ==================== КНОПКА "ЧИТАТЬ" ==================== */
+    .post-card .read-more {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: #667eea;
+        font-weight: 600;
+        font-size: 0.9rem;
+        text-decoration: none;
+        transition: gap 0.3s ease, color 0.3s ease;
+        align-self: flex-start;
+        padding-top: 16px;
+        border-top: 1px solid #f0f0f5;
+        width: 100%;
+        margin-top: auto;
+    }
+
+    .post-card .read-more:hover {
+        gap: 14px;
+        color: #764ba2;
+    }
+
+    .post-card .read-more::after {
+        content: '→';
+        transition: transform 0.3s ease;
+    }
+
+    .post-card .read-more:hover::after {
+        transform: translateX(4px);
+    }
+
+    /* ==================== ПУСТОЙ СПИСОК ==================== */
+    .empty-state {
+        text-align: center;
+        padding: 80px 30px;
+        background: #ffffff;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+        max-width: 500px;
+        margin: 0 auto;
+    }
+
+    .empty-state .icon {
+        font-size: 4rem;
+        margin-bottom: 20px;
+        opacity: 0.6;
+    }
+
+    .empty-state h2 {
+        color: #1a1a2e;
+        font-size: 1.5rem;
+        margin-bottom: 12px;
+    }
+
+    .empty-state p {
+        color: #6b6b8a;
+        margin-bottom: 24px;
+    }
+
+    .empty-state a {
+        display: inline-block;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #ffffff;
+        padding: 12px 28px;
+        border-radius: 10px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.35);
+    }
+
+    .empty-state a:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.45);
+    }
+
+    /* ==================== АНИМАЦИИ ==================== */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes fadeInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* ==================== АДАПТИВНОСТЬ ==================== */
+    @media (max-width: 768px) {
+        .posts-wrapper {
+            padding: 30px 20px 20px;
+        }
+
+        .page-header {
+            margin-bottom: 35px;
+        }
+
+        .page-header h1 {
+            font-size: 2rem;
+        }
+
+        .page-header p {
+            font-size: 1rem;
+        }
+
+        .posts-grid {
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        .post-card-content {
+            padding: 22px 22px 24px;
+        }
+
+        .post-card h2 {
+            font-size: 1.25rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .page-header h1 {
+            font-size: 1.6rem;
+        }
+
+        .post-card {
+            border-radius: 12px;
+        }
+
+        .post-card-content {
+            padding: 20px 20px 22px;
+        }
+
+        .post-card h2 {
+            font-size: 1.15rem;
+        }
+
+        .post-card .excerpt {
+            font-size: 0.92rem;
+        }
+    }
+
+    /* ==================== ТЁМНАЯ ТЕМА ==================== */
+    @media (prefers-color-scheme: dark) {
+        .post-card {
+            background: #1e1e2f;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .post-card-img-wrapper {
+            background: #2a2a45;
+        }
+
+        .post-card h2 a {
+            color: #f0f0ff;
+        }
+
+        .post-card h2 a:hover {
+            color: #b8b0ff;
+        }
+
+        .post-card .excerpt {
+            color: #a5a5c0;
+        }
+
+        .post-card .read-more {
+            border-top-color: #2a2a45;
+        }
+
+        .page-header h1 {
+            background: linear-gradient(135deg, #a8b4ff 0%, #c4a0ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .page-header p {
+            color: #8a8aa8;
+        }
+
+        .post-card .date {
+            background: linear-gradient(135deg, #2a2a45 0%, #3a3a5c 100%);
+            color: #b8b0ff;
+        }
+    }
+</style>
+
+<div class="posts-wrapper">
+
+    <!-- Заголовок страницы -->
+    <div class="page-header">
+        <h1>Все статьи</h1>
+        <p>Свежие мысли, идеи и заметки из моего блога</p>
+        <div class="divider"></div>
+    </div>
+
+    <!-- Сетка статей -->
+    {% if posts %}
+        <div class="posts-grid">
+            {% for post in posts %}
+                <article class="post-card">
+                    <!-- Мини-баннер статьи (выводится, если картинка загружена) -->
+                    {% if post.banner %}
+                        <div class="post-card-img-wrapper">
+                            <a href="{% url 'post_detail' pk=post.pk %}">
+                                <img src="{{ post.banner.url }}" alt="{{ post.title }}" class="post-card-img">
+                            </a>
+                        </div>
+                    {% endif %}
+
+                    <div class="post-card-content">
+                        {% if post.published_date %}
+                            <span class="date">{{ post.published_date|date:"d M Y" }}</span>
+                        {% endif %}
+
+                        <h2>
+                            <a href="{% url 'post_detail' pk=post.pk %}">{{ post.title }}</a>
+                        </h2>
+
+                        <p class="excerpt">{{ post.text|linebreaksbr|truncatechars:180 }}</p>
+
+                        <a href="{% url 'post_detail' pk=post.pk %}" class="read-more">
+                            Читать статью
+                        </a>
+                    </div>
+                </article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <!-- Если статей нет -->
+        <div class="empty-state">
+            <div class="icon">📭</div>
+            <h2>Пока нет статей</h2>
+            <p>Станьте первым, кто поделится своей историей!</p>
+            <a href="#">✍️ Написать статью</a>
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}

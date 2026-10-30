@@ -1,0 +1,292 @@
+{% extends 'blog/base.html' %}
+
+{% block title %}
+Регистрация — Tropical Fashion ID
+{% endblock %}
+
+{% block content %}
+<style>
+    /* Стиль тропической палитры: гармония зелени, солнца и крема */
+    .tropical-auth-wrapper {
+        background-color: #f7f4eb; /* Светлый кремово-желтый подтон */
+        min-height: calc(100vh - 100px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 20px;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        color: #3b5249;
+        box-sizing: border-box;
+    }
+
+    /* Новый контейнер для размещения картинок по бокам и формы по центру */
+    .tropical-layout-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 30px;
+        width: 100%;
+        max-width: 1100px;
+        box-sizing: border-box;
+    }
+
+    /* Стили для боковых блоков с картинками */
+    .tropical-side-image {
+        flex: 1;
+        height: 520px;
+        background-color: #e5ede8;
+        border: 1px solid #c2cdc6;
+        border-radius: 4px;
+        overflow: hidden;
+        position: relative;
+        box-shadow: 0 10px 30px rgba(59, 82, 73, 0.05);
+    }
+
+    .tropical-side-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        filter: brightness(0.95);
+        transition: transform 0.5s ease;
+    }
+
+    .tropical-side-image:hover img {
+        transform: scale(1.03);
+    }
+
+    .tropical-card {
+        background: #ffffff;
+        border: 1px solid #c2cdc6;
+        border-radius: 4px;
+        width: 100%;
+        max-width: 440px;
+        flex: 0 0 440px;
+        padding: 40px;
+        box-shadow: 0 10px 30px rgba(59, 82, 73, 0.08);
+        position: relative;
+        box-sizing: border-box;
+    }
+
+    /* Солнечно-желтая акцентная полоска сверху */
+    .tropical-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: #dfb100; /* Солнечно-желтый цвет */
+    }
+
+    .tropical-title {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #2b3e36;
+        text-align: center;
+        margin-bottom: 28px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    /* Поля ввода */
+    .tropical-form-group {
+        margin-bottom: 20px;
+        position: relative;
+    }
+
+    .tropical-form-group label {
+        display: block;
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: #5c7368;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .tropical-form-group input {
+        width: 100%;
+        padding: 12px 14px;
+        background-color: #faf8f2;
+        border: 1px solid #b3c2bc;
+        border-radius: 2px;
+        font-size: 0.95rem;
+        color: #2b3e36;
+        box-sizing: border-box;
+        transition: border-color 0.2s, background-color 0.2s;
+    }
+
+    .tropical-form-group input:focus {
+        outline: none;
+        background-color: #ffffff;
+        border-color: #dfb100; /* Фокус в солнечно-желтом стиле */
+    }
+
+    /* Ошибки валидации */
+    .errorlist {
+        list-style: none;
+        padding: 0;
+        margin: 6px 0 0 0;
+        color: #a84343;
+        font-size: 0.8rem;
+    }
+
+    /* Всплывающая подсказка для пароля */
+    .tropical-password-tooltip {
+        display: none;
+        position: absolute;
+        left: 105%;
+        top: 0;
+        width: 230px;
+        background: #ffffff;
+        border: 1px solid #b3c2bc;
+        border-left: 3px solid #dfb100;
+        padding: 12px;
+        box-shadow: 0 8px 24px rgba(59, 82, 73, 0.12);
+        font-size: 0.8rem;
+        color: #5c7368;
+        z-index: 10;
+        border-radius: 2px;
+    }
+
+    .tropical-password-tooltip ul {
+        margin: 6px 0 0 16px;
+        padding: 0;
+    }
+
+    .tropical-password-tooltip li.valid {
+        color: #437a5e; /* Насыщенный травянисто-зеленый при успехе */
+    }
+
+    /* Кнопка */
+    .tropical-submit-btn {
+        width: 100%;
+        background-color: #3b5249; /* Болотно-зеленый / темно-зеленый тон */
+        color: #ffffff;
+        border: none;
+        padding: 13px;
+        border-radius: 2px;
+        font-size: 0.95rem;
+        font-weight: 700;
+        cursor: pointer;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transition: background-color 0.2s, transform 0.1s;
+        margin-top: 10px;
+    }
+
+    .tropical-submit-btn:hover {
+        background-color: #4d685d;
+    }
+
+    .tropical-submit-btn:active {
+        transform: scale(0.99);
+    }
+
+    /* Адаптивность */
+    @media (max-width: 900px) {
+        .tropical-side-image {
+            display: none; /* Скрываем боковые картинки на средних и мобильных экранах для удобства */
+        }
+    }
+
+    @media (max-width: 768px) {
+        .tropical-password-tooltip {
+            position: static;
+            width: 100%;
+            margin-top: 8px;
+            box-sizing: border-box;
+        }
+    }
+</style>
+
+<div class="tropical-auth-wrapper">
+    <div class="tropical-layout-container">
+        
+        <!-- Левая картинка (модная тематика / тропический стиль) -->
+        <div class="tropical-side-image">
+            <img src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=800&auto=format&fit=crop" alt="Tropical Fashion Look 1">
+        </div>
+
+        <!-- Центральная форма регистрации -->
+        <div class="tropical-card">
+            <h3 class="tropical-title">Регистрация аккаунта</h3>
+            
+            <form class="form-with-validation" action="{% url 'users:register' %}" method="post">
+                {% csrf_token %}
+                
+                {% for field in form %}
+                    <div class="tropical-form-group" {% if 'password' in field.name.lower %}id="password-group"{% endif %}>
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        
+                        {% if field.errors %}
+                            <ul class="errorlist">
+                                {% for error in field.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+
+                        {% if 'password' in field.name.lower %}
+                            <div class="tropical-password-tooltip" id="tropical-pass-tooltip">
+                                <strong>Требования безопасности:</strong>
+                                <ul>
+                                    <li id="tropical-length-check">Мин. 8 символов</li>
+                                    <li id="tropical-letter-check">Буквы и цифры</li>
+                                </ul>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+
+                <button type="submit" class="tropical-submit-btn">Создать учетную запись</button>
+            </form>
+        </div>
+
+        <!-- Правая картинка (модная тематика / тропический стиль) -->
+        <div class="tropical-side-image">
+            <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=800&auto=format&fit=crop" alt="Tropical Fashion Look 2">
+        </div>
+
+    </div>
+</div>
+
+<!-- Скрипт динамической проверки пароля -->
+<script>
+    const tropicalPasswordInputs = document.querySelectorAll('input[type="password"]');
+    const tropicalTooltip = document.getElementById('tropical-pass-tooltip');
+    
+    if (tropicalTooltip && tropicalPasswordInputs.length > 0) {
+        const primaryInput = tropicalPasswordInputs[0];
+        const lengthCheck = document.getElementById('tropical-length-check');
+        const letterCheck = document.getElementById('tropical-letter-check');
+
+        primaryInput.addEventListener('focus', function() {
+            tropicalTooltip.style.display = 'block';
+        });
+
+        primaryInput.addEventListener('blur', function() {
+            setTimeout(() => { tropicalTooltip.style.display = 'none'; }, 200);
+        });
+
+        primaryInput.addEventListener('input', function() {
+            const val = primaryInput.value;
+
+            if (val.length >= 8) {
+                lengthCheck.classList.add('valid');
+            } else {
+                lengthCheck.classList.remove('valid');
+            }
+
+            const hasLetters = /[a-zA-Zа-яА-Я]/.test(val);
+            const hasNumbers = /[0-9]/.test(val);
+            if (hasLetters && hasNumbers) {
+                letterCheck.classList.add('valid');
+            } else {
+                letterCheck.classList.remove('valid');
+            }
+        });
+    }
+</script>
+{% endblock %}
